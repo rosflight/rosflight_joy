@@ -1,0 +1,30 @@
+#!/usr/bin/python
+
+import rospy
+from rosflight_msgs.msg import Command
+from rosflight_joystick_base import rosflight_joystick_base
+
+class rosflight_joystick_angle_command(rosflight_joystick_base):
+    def __init__(self, device = 0):
+        rosflight_joystick_base.__init__(self, device)
+
+        rospy.init_node('command_joy')
+        command_pub = rospy.Publisher('command', Command, queue_size=10)
+
+        while not rospy.is_shutdown():
+            if self.update():
+                msg = Command()
+                msg.header.stamp = rospy.Time.now()
+
+                msg.ignore = Command.IGNORE_NONE
+                msg.mode = Command.MODE_ROLL_PITCH_YAWRATE_THROTTLE
+
+                msg.x = self.get_value('x') * 0.785
+                msg.y = self.get_value('y') * 0.785
+                msg.z = self.get_value('z') * 1.507
+                msg.F = self.get_value('F') * 0.5 + 0.5
+
+                command_pub.publish(msg)
+
+if __name__ == "__main__":
+    joy_object = rosflight_joystick_angle_command()
