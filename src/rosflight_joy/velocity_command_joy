@@ -1,0 +1,36 @@
+#!/usr/bin/python
+
+import rospy
+from rosflight_msgs.msg import Command
+from rosflight_joystick_base import rosflight_joystick_base
+
+class rosflight_joystick_velocity(rosflight_joystick_base):
+    def __init__(self, device = 0):
+        rosflight_joystick_base.__init__(self, device)
+
+        rospy.init_node('rc_joy')
+        rc_pub = rospy.Publisher('velocity_command', Command, queue_size=10)
+
+        current_alt_setpoint = 0.0
+
+        while not rospy.is_shutdown():
+            if self.update():
+                msg = Command()
+                msg.header.stamp = rospy.Time.now()
+
+                msg = Command()
+                msg.header.stamp = rospy.Time.now()
+
+                msg.mode = Command.MODE_XVEL_YVEL_YAWRATE_ALTITUDE
+                msg.ignore = Command.IGNORE_NONE
+
+                current_alt_setpoint -= 0.1 * self.get_value('F')
+                msg.y = self.get_value('x') * 2.0
+                msg.x = self.get_value('y') * -2.0
+                msg.z = self.get_value('z') * 1.507
+                msg.F = current_alt_setpoint
+
+                rc_pub.publish(msg)
+
+if __name__ == "__main__":
+    joy_object = rosflight_joystick_velocity()

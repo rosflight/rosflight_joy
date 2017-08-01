@@ -111,11 +111,6 @@ class rosflight_joystick_base():
             self.values['F'] = self.joy.get_axis(self.mapping['F']) * self.mapping['Fsign']
             self.values['z'] = self.joy.get_axis(self.mapping['z']) * self.mapping['zsign']
 
-            print "\nupdate"
-            for key, item in self.values.iteritems():
-                print key, ":", item
-
-
             for key in ['aux1', 'aux2', 'aux3', 'aux4']:
                 if self.mapping[key]['type'] == 'axis':
                     self.values[key] = self.joy.get_axis(self.mapping[key]['id'])
