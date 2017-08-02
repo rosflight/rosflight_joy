@@ -8,7 +8,7 @@ class rosflight_joystick_velocity(rosflight_joystick_base):
     def __init__(self, device = 0):
         rosflight_joystick_base.__init__(self, device)
 
-        rospy.init_node('rc_joy')
+        rospy.init_node('velocity_command_joy')
         rc_pub = rospy.Publisher('velocity_command', Command, queue_size=10)
 
         current_alt_setpoint = 0.0
