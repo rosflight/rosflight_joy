@@ -24,13 +24,20 @@ class rosflight_joystick_velocity(rosflight_joystick_base):
                 msg.mode = Command.MODE_XVEL_YVEL_YAWRATE_ALTITUDE
                 msg.ignore = Command.IGNORE_NONE
 
-                current_alt_setpoint -= 0.1 * self.get_value('F')
+                # Apply a deadzone for altitude
+                current_alt_setpoint -= 0.05 * self.get_value('F')
                 msg.y = self.get_value('x') * 2.0
                 msg.x = self.get_value('y') * -2.0
                 msg.z = self.get_value('z') * 1.507
                 msg.F = current_alt_setpoint
 
                 rc_pub.publish(msg)
+
+    def get_value(self, key):
+        if abs(self.values[key]) > 0.1:
+            return self.values[key]
+        else:
+            return 0.0
 
 if __name__ == "__main__":
     joy_object = rosflight_joystick_velocity()
