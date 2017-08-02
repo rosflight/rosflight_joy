@@ -5,12 +5,15 @@
 import time
 import pygame
 import re
+import os, sys
 
 class rosflight_joystick_base():
     def __init__(self, device = 0):
+        os.environ["SDL_VIDEODRIVER"] = "dummy"
         pygame.display.init()
+        screen = pygame.display.set_mode((1,1))
         pygame.joystick.init()
-
+        
         self.joy = pygame.joystick.Joystick(device)
         self.joy.init()
 
