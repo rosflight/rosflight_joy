@@ -46,8 +46,8 @@ class rosflight_joystick_base():
             self.mapping['zsign'] = 1
             self.mapping['Fsign'] = 1
             self.mapping['aux1'] = {'type': 'axis', 'id': 4}
-            self.mapping['aux2'] = {'type': 'switch', 'id': 0}
-            self.mapping['aux3'] = {'type': 'switch', 'id': 1}
+            self.mapping['aux2'] = {'type': 'axis', 'id': 5}
+            self.mapping['aux3'] = {'type': 'axis', 'id': 6}
             self.mapping['aux4'] = {'type': 'switch', 'id': 2}
         elif 'Xbox' in self.joy.get_name() or 'X-Box' in self.joy.get_name():
             print "found xbox"
