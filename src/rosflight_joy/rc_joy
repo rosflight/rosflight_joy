@@ -28,7 +28,7 @@ class rosflight_joystic_RC(rosflight_joystick_base):
 
                 rc_pub.publish(msg)
 
-                time.sleep(0.02)
+            time.sleep(0.02)
 
     def get_value(self, key):
         return self.values[key] * 500 + 1500

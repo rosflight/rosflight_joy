@@ -3,6 +3,7 @@
 import rospy
 from rosflight_msgs.msg import Command
 from rosflight_joystick_base import rosflight_joystick_base
+from time import sleep
 
 class rosflight_joystick_velocity(rosflight_joystick_base):
     def __init__(self, device = 0):
@@ -32,6 +33,7 @@ class rosflight_joystick_velocity(rosflight_joystick_base):
                 msg.F = current_alt_setpoint
 
                 rc_pub.publish(msg)
+            sleep(0.02)
 
     def get_value(self, key):
         if abs(self.values[key]) > 0.15:
