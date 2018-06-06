@@ -2,13 +2,13 @@
 
 # author: James Jackson
 
+import os
 import time
 import pygame
-import re
-import os, sys
+
 
 class rosflight_joystick_base():
-    def __init__(self, device = 0):
+    def __init__(self, device=0):
         os.environ["SDL_VIDEODRIVER"] = "dummy"
         pygame.display.init()
         screen = pygame.display.set_mode((1,1))
@@ -17,7 +17,8 @@ class rosflight_joystick_base():
         self.joy = pygame.joystick.Joystick(device)
         self.joy.init()
 
-        print "joystick:", self.joy.get_name()
+        print "joystick: {} (axes: {}, buttons: {}, hats: {})".format(
+            self.joy.get_name(), self.joy.get_numaxes(), self.joy.get_numbuttons(), self.joy.get_numhats())
 
         self.mapping = dict()
 
@@ -49,6 +50,7 @@ class rosflight_joystick_base():
             self.mapping['aux2'] = {'type': 'axis', 'id': 5}
             self.mapping['aux3'] = {'type': 'axis', 'id': 6}
             self.mapping['aux4'] = {'type': 'switch', 'id': 2}
+
         elif 'Xbox' in self.joy.get_name() or 'X-Box' in self.joy.get_name():
             print "found xbox"
             self.mapping['x'] = 3
@@ -64,8 +66,26 @@ class rosflight_joystick_base():
             self.mapping['aux3'] = {'type': 'button', 'id': 2}
             self.mapping['aux4'] = {'type': 'button', 'id': 3}
             self.look_for_button_press_events = True
+
+        elif 'Extreme 3D' in self.joy.get_name():
+            print "found Logitech Extreme 3D"
+            self.mapping['x'] = 0
+            self.mapping['y'] = 1
+            self.mapping['z'] = 2
+            self.mapping['F'] = 3
+            self.mapping['xsign'] = 1
+            self.mapping['ysign'] = 1
+            self.mapping['zsign'] = 1
+            self.mapping['Fsign'] = -1
+            self.mapping['aux1'] = {'type': 'button', 'id': 0}
+            self.mapping['aux2'] = {'type': 'button', 'id': 1}
+            self.mapping['aux3'] = {'type': 'button', 'id': 2}
+            self.mapping['aux4'] = {'type': 'button', 'id': 3}
+            # the Extreme 3D has actually 12 buttons, but rc_joy forwards only 4 aux keys
+            self.look_for_button_press_events = True
+
         else:
-            print "using realflght mapping"
+            print "using realflight mapping"
             self.mapping['x'] = 1
             self.mapping['y'] = 2
             self.mapping['z'] = 4
@@ -101,9 +121,8 @@ class rosflight_joystick_base():
                                             self.prev_button_values,
                                             ['aux1', 'aux2', 'aux3', 'aux4']):
                 if current != prev and current == 1:
-                    self.values[key] = -1*self.values[key]
+                    self.values[key] = -1 * self.values[key]
             self.prev_button_values = current_button_values
-
 
         # 50 Hz update
         if time.time() > self.next_update_time:
