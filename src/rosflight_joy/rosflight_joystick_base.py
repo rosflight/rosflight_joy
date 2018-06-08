@@ -100,11 +100,15 @@ class rosflight_joystick_base():
             self.mapping['aux4'] = {'type': 'switch', 'id': 2}
 
         if self.look_for_button_press_events:
+            # get keys for all inputs typed as 'button'
+            self.button_keys = [key for key in self.mapping.iterkeys()
+                                if 'aux' in key and self.mapping[key]['type'] == 'button']
+            # initialize values for the buttons
             self.prev_button_values = []
-            for key in self.mapping.iterkeys():
-                if 'aux' in key and self.mapping[key]['type'] == 'button':
-                    self.prev_button_values.append(self.joy.get_button(self.mapping[key]['id']))
-                    self.mapping[key]['value'] = self.joy.get_button(self.mapping[key]['id'])
+            for key in self.button_keys:
+                button_value = self.joy.get_button(self.mapping[key]['id'])
+                self.prev_button_values.append(button_value)
+                self.mapping[key]['value'] = button_value
 
     def update(self):
         pygame.event.pump()
@@ -112,17 +116,22 @@ class rosflight_joystick_base():
         # Look for button press events in the case of a joystick controller
         # (switch value on button press)
         if self.look_for_button_press_events:
-            current_button_values = []
-            for key in self.mapping.iterkeys():
-                if 'aux' in key and self.mapping[key]['type'] == 'button':
-                    current_button_values.append(self.joy.get_button(self.mapping[key]['id']))
+            # get values for the buttons
+            current_button_values = [self.joy.get_button(self.mapping[key]['id']) for key in self.button_keys]
 
             for (current, prev, key) in zip(current_button_values,
                                             self.prev_button_values,
-                                            ['aux1', 'aux2', 'aux3', 'aux4']):
+                                            self.button_keys):
                 if current != prev and current == 1:
                     self.values[key] = -1 * self.values[key]
+                    # print "button action: key:",key, "id:",self.mapping[key]['id'], "toggle-state:",self.values[key]
+
+            # Note that storing the values as a plain, key-less list between loops does only work if the
+            # self.mapping dict is not modified at all. std-dict iterates in arbitrary order.
             self.prev_button_values = current_button_values
+
+        # For 'switch' type aux keys, the published value is directly the current state of being pressed.
+        # Updated in below loop. Same for 'axis' type aux keys.
 
         # 50 Hz update
         if time.time() > self.next_update_time:
