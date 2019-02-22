@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 # author: James Jackson
 
@@ -17,8 +17,8 @@ class rosflight_joystick_base():
         self.joy = pygame.joystick.Joystick(device)
         self.joy.init()
 
-        print "joystick: {} (axes: {}, buttons: {}, hats: {})".format(
-            self.joy.get_name(), self.joy.get_numaxes(), self.joy.get_numbuttons(), self.joy.get_numhats())
+        print("joystick: {} (axes: {}, buttons: {}, hats: {})".format(
+            self.joy.get_name(), self.joy.get_numaxes(), self.joy.get_numbuttons(), self.joy.get_numhats()))
 
         self.mapping = dict()
 
@@ -37,13 +37,13 @@ class rosflight_joystick_base():
         self.next_update_time = time.time()
 
         if 'Taranis' in self.joy.get_name():
-            print "found Taranis"
+            print("found Taranis")
             self.mapping['x'] = 1
             self.mapping['y'] = 2
             self.mapping['z'] = 3
             self.mapping['F'] = 0
             self.mapping['xsign'] = 1
-            self.mapping['ysign'] = 1
+            self.mapping['ysign'] = -1
             self.mapping['zsign'] = 1
             self.mapping['Fsign'] = 1
             self.mapping['aux1'] = {'type': 'axis', 'id': 4}
@@ -52,7 +52,7 @@ class rosflight_joystick_base():
             self.mapping['aux4'] = {'type': 'switch', 'id': 2}
 
         elif 'Xbox' in self.joy.get_name() or 'X-Box' in self.joy.get_name():
-            print "found xbox"
+            # print "found xbox"
             self.mapping['x'] = 3
             self.mapping['y'] = 4
             self.mapping['z'] = 0
@@ -68,7 +68,7 @@ class rosflight_joystick_base():
             self.look_for_button_press_events = True
 
         elif 'Extreme 3D' in self.joy.get_name():
-            print "found Logitech Extreme 3D"
+            # print "found Logitech Extreme 3D"
             self.mapping['x'] = 0
             self.mapping['y'] = 1
             self.mapping['z'] = 2
@@ -85,7 +85,7 @@ class rosflight_joystick_base():
             self.look_for_button_press_events = True
 
         else:
-            print "using realflight mapping"
+            print("using realflight mapping")
             self.mapping['x'] = 1
             self.mapping['y'] = 2
             self.mapping['z'] = 4
