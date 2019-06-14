@@ -15,11 +15,11 @@ class rosflight_keyboard_RC(rosflight_keyboard_base):
             if self.update():
                 msg = RCRaw()
                 msg.header.stamp = rospy.Time.now()
-                msg.values[0] = self.get_value('x') # R - L/R
-                msg.values[1] = self.get_value('y') # R - U/D
-                msg.values[2] = self.get_value('F') # L - U/D
-                msg.values[3] = self.get_value('z') # L - L/R
-                msg.values[4] = self.get_value('aux1') # SF
+                msg.values[0] = self.get_value('x') 
+                msg.values[1] = self.get_value('y') 
+                msg.values[2] = self.get_value('F') 
+                msg.values[3] = self.get_value('z') 
+                msg.values[4] = self.get_value('aux1')
                 msg.values[5] = self.get_value('aux2')
                 msg.values[6] = self.get_value('aux3')
                 msg.values[7] = self.get_value('aux4')
@@ -31,4 +31,4 @@ class rosflight_keyboard_RC(rosflight_keyboard_base):
         return int(self.values[key] * 500 + 1500)
 
 if __name__ == "__main__":
-    joy_object = rosflight_keyboard_RC()
+    input_object = rosflight_keyboard_RC()
