@@ -2,6 +2,7 @@
 
 # author: James Jackson
 
+from __future__ import print_function
 import os
 import time
 import pygame
@@ -38,10 +39,10 @@ class rosflight_joystick_base():
 
         if 'Taranis' in self.joy.get_name():
             print("found Taranis")
-            self.mapping['x'] = 1
-            self.mapping['y'] = 2
+            self.mapping['x'] = 0
+            self.mapping['y'] = 1
             self.mapping['z'] = 3
-            self.mapping['F'] = 0
+            self.mapping['F'] = 2
             self.mapping['xsign'] = 1
             self.mapping['ysign'] = -1
             self.mapping['zsign'] = 1
