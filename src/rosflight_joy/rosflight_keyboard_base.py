@@ -44,7 +44,7 @@ class rosflight_keyboard_base():
         self.delta = 0.02
 
         self.next_update_time = time.time()
-        self.switch_wait_time = time.time()
+        self.switch_wait_until_time = time.time()
         self.switch_interval_time = 0.25
 
     def update(self):
@@ -57,9 +57,10 @@ class rosflight_keyboard_base():
                 if event.type == pygame.KEYDOWN and event.key in self.actions:
                     name = self.actions[event.key]['name']
                     sign = self.actions[event.key]['sign']
-                    if name == 'aux1' and time.time() > self.switch_wait_time:
+                    t = time.time()
+                    if name == 'aux1' and t > self.switch_wait_until_time:
                         self.values['aux1'] *= -1
-                        self.switch_wait_time = time.time() + self.switch_interval_time
+                        self.switch_wait_until_time = t + self.switch_interval_time
                     elif name != 'aux1':
                         self.shift_value(name, sign)
                     elif event.key == pygame.K_q:
