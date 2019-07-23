@@ -121,7 +121,7 @@ class rosflight_keyboard_base():
                 val = 0.
                 if self.print_limits:
                     print('{} axis returned to 0'.format(n))
-            else:
+            elif val != 0.:
                 val += self.delta if val < 0 else -self.delta
             self.values[n] = val
     
