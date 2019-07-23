@@ -44,7 +44,7 @@ class rosflight_joystick_base():
             self.mapping['z'] = 3
             self.mapping['F'] = 2
             self.mapping['xsign'] = 1
-            self.mapping['ysign'] = -1
+            self.mapping['ysign'] = 1
             self.mapping['zsign'] = 1
             self.mapping['Fsign'] = 1
             self.mapping['aux1'] = {'type': 'axis', 'id': 4}
@@ -53,7 +53,7 @@ class rosflight_joystick_base():
             self.mapping['aux4'] = {'type': 'switch', 'id': 2}
 
         elif 'Xbox' in self.joy.get_name() or 'X-Box' in self.joy.get_name():
-            # print "found xbox"
+            print("found xbox")
             self.mapping['x'] = 3
             self.mapping['y'] = 4
             self.mapping['z'] = 0
@@ -69,7 +69,7 @@ class rosflight_joystick_base():
             self.look_for_button_press_events = True
 
         elif 'Extreme 3D' in self.joy.get_name():
-            # print "found Logitech Extreme 3D"
+            print("found Logitech Extreme 3D")
             self.mapping['x'] = 0
             self.mapping['y'] = 1
             self.mapping['z'] = 2
@@ -125,7 +125,7 @@ class rosflight_joystick_base():
                                             self.button_keys):
                 if current != prev and current == 1:
                     self.values[key] = -1 * self.values[key]
-                    # print "button action: key:",key, "id:",self.mapping[key]['id'], "toggle-state:",self.values[key]
+                    # print("button action: key:",key, "id:",self.mapping[key]['id'], "toggle-state:",self.values[key])
 
             # Note that storing the values as a plain, key-less list between loops does only work if the
             # self.mapping dict is not modified at all. std-dict iterates in arbitrary order.
