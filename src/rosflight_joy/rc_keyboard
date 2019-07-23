@@ -9,54 +9,45 @@ class rosflight_keyboard_RC(rosflight_keyboard_base):
         rosflight_keyboard_base.__init__(self, device)
 
         rospy.init_node('rc_keyboard')
+        
         rc_pub = rospy.Publisher('RC', RCRaw, queue_size=10)
         
         rospy.Subscriber('status', Status, self.status_callback)
-        self.armed = False
+        self.auto_arm = rospy.get_param("~auto_arm", False) 
+        self.is_armed = False
         self.init = False
 
         rospy.sleep(3)
 
         while not rospy.is_shutdown():
+
+            if not self.init:                                             
+                if self.auto_arm and self.is_armed:                       
+                    rospy.loginfo("[rc_keyboard] auto-arming successful") 
+                    self.init = True                                      
+            
             self.update()
-            if not self.init:
-                if self.armed:
-                    rospy.loginfo("[rc_keyboard] auto-arming successful")
-                    self.init = True
-                    continue
+          
+            msg = RCRaw()
+            msg.header.stamp = rospy.Time.now()
+            msg.values[0] = self.get_value('x') 
+            msg.values[1] = self.get_value('y') 
+            msg.values[2] = self.get_value('F') 
+            msg.values[3] = self.get_value('z') 
+            msg.values[4] = self.get_value('aux1')
+            msg.values[5] = self.get_value('aux2')
+            msg.values[6] = self.get_value('aux3')
+            msg.values[7] = self.get_value('aux4')
 
-                msg = RCRaw()
-                msg.header.stamp = rospy.Time.now()
-                msg.values[0] = 1500
-                msg.values[1] = 1500
-                msg.values[2] = 1000
-                msg.values[3] = 2000
-                msg.values[4] = 2000
-                msg.values[5] = 1000
-                msg.values[6] = 1000
-                msg.values[7] = 1000
-                rc_pub.publish(msg)
-
-            else:
-                msg = RCRaw()
-                msg.header.stamp = rospy.Time.now()
-                msg.values[0] = self.get_value('x') 
-                msg.values[1] = self.get_value('y') 
-                msg.values[2] = self.get_value('F') 
-                msg.values[3] = self.get_value('z') 
-                msg.values[4] = self.get_value('aux1')
-                msg.values[5] = self.get_value('aux2')
-                msg.values[6] = self.get_value('aux3')
-                msg.values[7] = self.get_value('aux4')
-                rc_pub.publish(msg)
-
+            rc_pub.publish(msg)
+            
             rospy.sleep(0.02)
 
     def get_value(self, key):
         return int(self.values[key] * 500 + 1500)
 
     def status_callback(self, msg):
-        self.armed = msg.armed
+        self.is_armed = msg.armed
 
 if __name__ == "__main__":
     input_object = rosflight_keyboard_RC()

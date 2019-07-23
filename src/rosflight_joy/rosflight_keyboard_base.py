@@ -20,17 +20,21 @@ class rosflight_keyboard_base():
 
         self.print_limits = False
         self.limit_reached = False
+        
+        self.auto_arm = False
+        self.is_armed = False
+        self.init = False
 
         self.values = dict()
         self.values['x'] = 0
         self.values['y'] = 0
         self.values['F'] = 0
         self.values['z'] = 0
-        self.values['aux1'] = -1
+        self.values['aux1'] =  1
         self.values['aux2'] = -1
         self.values['aux3'] = -1
         self.values['aux4'] = -1
-
+        
         self.actions = dict()
         self.actions[pygame.K_UP]    = {'name':    'y', 'sign': -1, 'state': 0}
         self.actions[pygame.K_DOWN]  = {'name':    'y', 'sign':  1, 'state': 0}
@@ -41,13 +45,20 @@ class rosflight_keyboard_base():
         self.actions[pygame.K_a]     = {'name':    'z', 'sign': -1, 'state': 0}
         self.actions[pygame.K_d]     = {'name':    'z', 'sign':  1, 'state': 0}
         self.actions[pygame.K_o]     = {'name': 'aux1', 'sign':  1, 'state': 0}
-        self.delta = 0.02
+
+        self.delta = 0.05  # amount per interval that axis values slide towards zero
 
         self.next_update_time = time.time()
         self.switch_wait_until_time = time.time()
         self.switch_interval_time = 0.25
 
     def update(self):
+
+        if self.auto_arm and not self.init:
+            self.values['F'] = -1
+            self.values['z'] =  1
+            return False
+        
         pygame.event.pump()
 
         # 50 Hz update
@@ -106,8 +117,10 @@ class rosflight_keyboard_base():
                 continue
                 
             val = self.values[n]
-            if abs(val) < 1e-6:
+            if abs(val) < 1e-6 and val != 0.:
                 val = 0.
+                if self.print_limits:
+                    print('{} axis returned to 0'.format(n))
             else:
                 val += self.delta if val < 0 else -self.delta
             self.values[n] = val
