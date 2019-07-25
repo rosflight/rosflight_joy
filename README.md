@@ -3,7 +3,7 @@
 These nodes use pygame to directly access the joysticks with python, and automatically detects the joystick type and mappings.  You'll need to install pygame to get them working
 
 ``` bash
-sudo pip install pygame
+pip install pygame
 ```
 
 Or whatever environment you're using.
