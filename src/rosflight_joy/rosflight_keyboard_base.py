@@ -33,7 +33,7 @@ class rosflight_keyboard_base():
         self.values['y'] = 0
         self.values['F'] = 0
         self.values['z'] = 0
-        self.values['aux1'] =  1
+        self.values['aux1'] = 1
         self.values['aux2'] = -1
         self.values['aux3'] = -1
         self.values['aux4'] = -1
@@ -62,7 +62,12 @@ class rosflight_keyboard_base():
         if self.auto_arm and not self.init:
             self.values['F'] = -1
             self.values['z'] =  1
-            return False
+            if self.is_armed:
+                self.values['F'] = 0
+                self.values['z'] =  0
+                self.values['aux1'] = -1
+                self.init = True
+            return
         
         pygame.event.pump()
 
