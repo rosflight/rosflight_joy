@@ -15,7 +15,7 @@ class rosflight_keyboard_RC(rosflight_keyboard_base):
         rc_pub = rospy.Publisher('RC', RCRaw, queue_size=10)
         
         rospy.Subscriber('status', Status, self.status_callback)
-        self.auto_arm = rospy.get_param("~auto_arm", False) 
+        self.auto_arm = rospy.get_param('~auto_arm', False) 
         self.is_armed = False
         self.init = False
 
