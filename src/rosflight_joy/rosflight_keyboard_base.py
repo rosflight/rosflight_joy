@@ -59,7 +59,7 @@ class rosflight_keyboard_base():
 
     def update(self):
 
-        if self.auto_arm and not self.init:
+        if not self.init and self.auto_arm:
             self.values['F'] = -1
             self.values['z'] =  1
             if self.is_armed:

@@ -24,8 +24,8 @@ class rosflight_keyboard_RC(rosflight_keyboard_base):
         
         while not rospy.is_shutdown():
 
-            if not self.init:                                             
-                if self.auto_arm and self.is_armed:                       
+            if not self.init and self.auto_arm:
+                if self.is_armed:
                     rospy.loginfo("[rc_keyboard] auto-arming successful") 
             
             self.update()
