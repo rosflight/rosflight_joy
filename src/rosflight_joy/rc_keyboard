@@ -4,6 +4,7 @@
 
 import rospy
 from rosflight_msgs.msg import RCRaw, Status
+from std_msgs.msg import String
 from rosflight_keyboard_base import rosflight_keyboard_base
 
 class rosflight_keyboard_RC(rosflight_keyboard_base):
@@ -11,20 +12,28 @@ class rosflight_keyboard_RC(rosflight_keyboard_base):
         rosflight_keyboard_base.__init__(self, device)
 
         rospy.init_node('rc_keyboard')
+        rospy.loginfo("[rc_keyboard] initing")
         
         rc_pub = rospy.Publisher('RC', RCRaw, queue_size=10)
         
-        rospy.Subscriber('status', Status, self.status_callback)
+        self.status_sub = rospy.Subscriber('status', Status, self.status_callback)
+        # waiting until firmware version is published avoids some "Unable to arm" errors
+        self.version_sub = rospy.Subscriber('version', String, self.version_callback)
+
         self.auto_arm = rospy.get_param('~auto_arm', False) 
-        self.is_armed = False
+        if self.auto_arm:
+            rospy.logwarn("[rc_keyboard] auto-arming is ON. Waiting for firmware version")
+        else:
+            rospy.loginfo("[rc_keyboard] auto-arming is OFF.")
+
         self.init = False
+        self.is_armed = False
+        self.got_version = False
 
-        rospy.sleep(3)
-        rospy.loginfo("[rc_keyboard] init successful")
-        
         while not rospy.is_shutdown():
-
-            if not self.init and self.auto_arm:
+            if self.auto_arm and not self.init:
+                if not self.got_version:
+                    continue
                 if self.is_armed:
                     rospy.loginfo("[rc_keyboard] auto-arming successful") 
             
@@ -53,6 +62,11 @@ class rosflight_keyboard_RC(rosflight_keyboard_base):
 
     def status_callback(self, msg):
         self.is_armed = msg.armed
+        self.status_sub.unregister()
+    
+    def version_callback(self, msg):
+        self.got_version = True
+        self.version_sub.unregister()
 
 if __name__ == "__main__":
     input_object = rosflight_keyboard_RC()

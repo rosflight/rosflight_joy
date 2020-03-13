@@ -58,17 +58,10 @@ class rosflight_keyboard_base():
         self.switch_interval_time = 0.25
 
     def update(self):
-
-        if not self.init and self.auto_arm:
-            self.values['F'] = -1
-            self.values['z'] =  1
-            if self.is_armed:
-                self.values['F'] = 0
-                self.values['z'] =  0
-                self.values['aux1'] = -1
-                self.init = True
+        if self.auto_arm and not self.init:
+            self.arm()
             return
-        
+
         pygame.event.pump()
 
         # 50 Hz update
@@ -130,6 +123,17 @@ class rosflight_keyboard_base():
                 val += self.delta if val < 0 else -self.delta
             self.values[n] = val
     
+    def arm(self):
+        self.values['F'] = -1
+        self.values['z'] =  1
+        if self.is_armed:
+            self.values['F'] = 0
+            self.values['z'] =  0
+            self.values['aux1'] = -1
+            self.init = True
+        return
+        
+        
     def quit(self):
         pygame.quit()
         sys.exit(0)
