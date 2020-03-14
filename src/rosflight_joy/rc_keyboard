@@ -14,44 +14,48 @@ class rosflight_keyboard_RC(rosflight_keyboard_base):
         rospy.init_node('rc_keyboard')
         rospy.loginfo("[rc_keyboard] initing")
         
-        rc_pub = rospy.Publisher('RC', RCRaw, queue_size=10)
+        self.rc_pub = rospy.Publisher('RC', RCRaw, queue_size=10)
         
         self.status_sub = rospy.Subscriber('status', Status, self.status_callback)
         # waiting until firmware version is published avoids some "Unable to arm" errors
         self.version_sub = rospy.Subscriber('version', String, self.version_callback)
 
+        self.init = False
+        self.is_armed = False
+        self.got_version = False
         self.auto_arm = rospy.get_param('~auto_arm', False) 
         if self.auto_arm:
             rospy.logwarn("[rc_keyboard] auto-arming is ON. Waiting for firmware version")
         else:
             rospy.loginfo("[rc_keyboard] auto-arming is OFF.")
 
-        self.init = False
-        self.is_armed = False
-        self.got_version = False
-
+    def run(self):
         while not rospy.is_shutdown():
+            
             if self.auto_arm and not self.init:
-                if not self.got_version:
-                    continue
-                if self.is_armed:
-                    rospy.loginfo("[rc_keyboard] auto-arming successful") 
+                if self.got_version:
+                    self.arm() 
+                    if self.is_armed:
+                        self.values['aux2'] = -1
+                        self.init = True
+                        rospy.loginfo("[rc_keyboard] auto-arming successful") 
+                else:
+                    continue 
             
             self.update()
-          
+        
             msg = RCRaw()
-            msg.header.stamp = rospy.Time.now()
-            msg.values[0] = self.get_value('x') 
-            msg.values[1] = self.get_value('y') 
-            msg.values[2] = self.get_value('F') 
-            msg.values[3] = self.get_value('z') 
-            msg.values[4] = self.get_value('aux1')
-            msg.values[5] = self.get_value('aux2')
-            msg.values[6] = self.get_value('aux3')
-            msg.values[7] = self.get_value('aux4')
+            msg.header.stamp = rospy.Time.now()     # key: action  
+            msg.values[0] = self.get_value('x')     # left/right: roll 
+            msg.values[1] = self.get_value('y')     # up/down: pitch 
+            msg.values[2] = self.get_value('F')     # w/s: throttle  
+            msg.values[3] = self.get_value('z')     # a/d: yaw
+            msg.values[4] = self.get_value('aux1')  # m: arm/disarm toggle 
+            msg.values[5] = self.get_value('aux2')  # o: rc override toggle 
+            msg.values[6] = self.get_value('aux3')  
+            msg.values[7] = self.get_value('aux4')  
 
-            rc_pub.publish(msg)
-            
+            self.rc_pub.publish(msg)
             rospy.sleep(0.02)
 
         self.quit()
@@ -60,13 +64,20 @@ class rosflight_keyboard_RC(rosflight_keyboard_base):
     def get_value(self, key):
         return int(self.values[key] * 500 + 1500)
 
+    def arm(self):
+        self.values['F'] = -1
+        self.values['aux1'] = 1
+        self.values['aux2'] = 1
+        return
+        
     def status_callback(self, msg):
         self.is_armed = msg.armed
-        self.status_sub.unregister()
     
     def version_callback(self, msg):
         self.got_version = True
         self.version_sub.unregister()
 
 if __name__ == "__main__":
-    input_object = rosflight_keyboard_RC()
+    rck = rosflight_keyboard_RC()
+    rck.run()
+    
