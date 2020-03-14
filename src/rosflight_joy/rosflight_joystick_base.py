@@ -14,7 +14,7 @@ class rosflight_joystick_base():
         pygame.display.init()
         screen = pygame.display.set_mode((1,1))
         pygame.joystick.init()
-        
+
         self.joy = pygame.joystick.Joystick(device)
         self.joy.init()
 
@@ -84,6 +84,21 @@ class rosflight_joystick_base():
             self.mapping['aux4'] = {'type': 'button', 'id': 3}
             # the Extreme 3D has actually 12 buttons, but rc_joy forwards only 4 aux keys
             self.look_for_button_press_events = True
+
+        elif 'Sony PLAYSTATION(R)3 Controller' in self.joy.get_name():
+            print("using PS3 Controller")
+            self.mapping['x'] = 3
+            self.mapping['y'] = 4
+            self.mapping['z'] = 0
+            self.mapping['F'] = 1
+            self.mapping['xsign'] = 1
+            self.mapping['ysign'] = 1
+            self.mapping['zsign'] = 1
+            self.mapping['Fsign'] = -1
+            self.mapping['aux1'] = {'type': 'axis', 'id': 2}
+            self.mapping['aux2'] = {'type': 'switch', 'id': 0}
+            self.mapping['aux3'] = {'type': 'switch', 'id': 1}
+            self.mapping['aux4'] = {'type': 'switch', 'id': 2}
 
         else:
             print("using realflight mapping")
