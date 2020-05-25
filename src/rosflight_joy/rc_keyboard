@@ -22,7 +22,7 @@ class rosflight_keyboard_RC(rosflight_keyboard_base):
 
         self.init = False
         self.is_armed = False
-        self.got_version = False
+        self.got_version = True
         self.auto_arm = rospy.get_param('~auto_arm', False) 
         if self.auto_arm:
             rospy.logwarn("[rc_keyboard] auto-arming is ON. Waiting for firmware version")
