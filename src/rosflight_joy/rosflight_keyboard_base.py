@@ -24,13 +24,13 @@ class rosflight_keyboard_base():
         self.print_limits = False
         self.limit_reached = False
 
-        self.values = dict()       # key: action
-        self.values['x'] = 0       # left/right: roll
-        self.values['y'] = 0       # up/down: pitch
-        self.values['F'] = -1      # w/s: throttle
-        self.values['z'] = 0       # a/d: yaw
-        self.values['aux1'] = -1   # m: arm/disarm toggle
-        self.values['aux2'] = -1   # o: rc override toggle
+        self.values = dict()      # key: action
+        self.values['x'] = 0      # left/right: roll
+        self.values['y'] = 0      # up/down: pitch
+        self.values['F'] = -1     # w/s: throttle
+        self.values['z'] = 0      # a/d: yaw
+        self.values['aux1'] = -1  # m: arm toggle (assumes ARM_CHANNEL=4)
+        self.values['aux2'] = -1  # o: rc override toggle
         self.values['aux3'] = -1
         self.values['aux4'] = -1
 

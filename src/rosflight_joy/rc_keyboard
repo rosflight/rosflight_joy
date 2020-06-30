@@ -24,6 +24,9 @@ class rosflight_keyboard_RC(rosflight_keyboard_base):
         self.is_armed = False
         self.got_version = False
         self.auto_arm = rospy.get_param('~auto_arm', False)
+        if not self.auto_arm:
+            self.init = True
+        self.rate = rospy.Rate(50)
         if self.auto_arm:
             rospy.logwarn("[rc_keyboard] auto-arming is ON. Waiting for firmware version")
         else:
@@ -42,21 +45,22 @@ class rosflight_keyboard_RC(rosflight_keyboard_base):
                 else:
                     continue
 
-            self.update()
+            if self.init:
+                self.update()
 
             msg = RCRaw()
-            msg.header.stamp = rospy.Time.now()     # key: action
-            msg.values[0] = self.get_value('x')     # left/right: roll
-            msg.values[1] = self.get_value('y')     # up/down: pitch
-            msg.values[2] = self.get_value('F')     # w/s: throttle
-            msg.values[3] = self.get_value('z')     # a/d: yaw
-            msg.values[4] = self.get_value('aux1')  # m: arm/disarm toggle
-            msg.values[5] = self.get_value('aux2')  # o: rc override toggle
+            msg.header.stamp = rospy.Time.now()    # key: action
+            msg.values[0] = self.get_value('x')    # left/right: roll
+            msg.values[1] = self.get_value('y')    # up/down: pitch
+            msg.values[2] = self.get_value('F')    # w/s: throttle
+            msg.values[3] = self.get_value('z')    # a/d: yaw
+            msg.values[4] = self.get_value('aux1') # m: arm toggle (assumes ARM_CHANNEL=4)
+            msg.values[5] = self.get_value('aux2') # o: rc override toggle
             msg.values[6] = self.get_value('aux3')
             msg.values[7] = self.get_value('aux4')
 
             self.rc_pub.publish(msg)
-            rospy.sleep(0.02)
+            self.rate.sleep()
 
         self.quit()
 
@@ -65,9 +69,12 @@ class rosflight_keyboard_RC(rosflight_keyboard_base):
         return int(self.values[key] * 500 + 1500)
 
     def arm(self):
-        self.values['F'] = -1
-        self.values['aux1'] = 1
-        self.values['aux2'] = 1
+        self.values['aux2'] = 1  # rc override ON
+        self.values['aux1'] = 1  # arm toggle ON
+        self.values['F'] = -1    # throttle to 0%
+
+        # In case ARM_CHANNEL is not set, this will be required to arm
+        self.values['z'] = 1     # yaw at 100%
         return
 
     def status_callback(self, msg):
