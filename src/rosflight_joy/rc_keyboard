@@ -39,7 +39,7 @@ class rosflight_keyboard_RC(rosflight_keyboard_base):
                 if self.got_version:
                     self.arm()
                     if self.is_armed:
-                        self.values['aux2'] = -1
+                        self.values['aux1'] = -1
                         self.init = True
                         rospy.loginfo("[rc_keyboard] auto-arming successful")
                 else:
@@ -54,8 +54,8 @@ class rosflight_keyboard_RC(rosflight_keyboard_base):
             msg.values[1] = self.get_value('y')    # up/down: pitch
             msg.values[2] = self.get_value('F')    # w/s: throttle
             msg.values[3] = self.get_value('z')    # a/d: yaw
-            msg.values[4] = self.get_value('aux1') # m: arm toggle (assumes ARM_CHANNEL=4)
-            msg.values[5] = self.get_value('aux2') # o: rc override toggle
+            msg.values[4] = self.get_value('aux1') # o: rc override toggle
+            msg.values[5] = self.get_value('aux2') # m: arm toggle (assumes ARM_CHANNEL=4)
             msg.values[6] = self.get_value('aux3')
             msg.values[7] = self.get_value('aux4')
 
@@ -69,8 +69,8 @@ class rosflight_keyboard_RC(rosflight_keyboard_base):
         return int(self.values[key] * 500 + 1500)
 
     def arm(self):
-        self.values['aux2'] = 1  # rc override ON
-        self.values['aux1'] = 1  # arm toggle ON
+        self.values['aux2'] = 1  # arm toggle ON
+        self.values['aux1'] = 1  # rc override ON
         self.values['F'] = -1    # throttle to 0%
 
         # In case ARM_CHANNEL is not set, this will be required to arm

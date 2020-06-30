@@ -29,8 +29,8 @@ class rosflight_keyboard_base():
         self.values['y'] = 0      # up/down: pitch
         self.values['F'] = -1     # w/s: throttle
         self.values['z'] = 0      # a/d: yaw
-        self.values['aux1'] = -1  # m: arm toggle (assumes ARM_CHANNEL=4)
-        self.values['aux2'] = -1  # o: rc override toggle
+        self.values['aux1'] = -1  # o: rc override toggle
+        self.values['aux2'] = -1  # m: arm toggle (assumes ARM_CHANNEL=4)
         self.values['aux3'] = -1
         self.values['aux4'] = -1
 
@@ -44,8 +44,8 @@ class rosflight_keyboard_base():
             (pygame.K_s,     'F', -1),
             (pygame.K_a,     'z', -1),
             (pygame.K_d,     'z',  1),
-            (pygame.K_m,  'aux1',  1),
-            (pygame.K_o,  'aux2',  1)
+            (pygame.K_o,  'aux1',  1),
+            (pygame.K_m,  'aux2',  1)
         ], dtypes)
 
         self.delta = 0.05  # amount per interval that axis values slide towards zero
