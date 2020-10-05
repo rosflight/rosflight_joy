@@ -27,7 +27,7 @@ class rosflight_keyboard_base():
         self.values = dict()      # key: action
         self.values['x'] = 0      # left/right: roll
         self.values['y'] = 0      # up/down: pitch
-        self.values['F'] = -1     # w/s: throttle
+        self.values['F'] = -1     # w/s: throttle (z: full, x: zero, c: half)
         self.values['z'] = 0      # a/d: yaw
         self.values['aux1'] = -1  # o: rc override toggle
         self.values['aux2'] = -1  # m: arm toggle (assumes ARM_CHANNEL=4)
@@ -45,10 +45,13 @@ class rosflight_keyboard_base():
             (pygame.K_a,     'z', -1),
             (pygame.K_d,     'z',  1),
             (pygame.K_o,  'aux1',  1),
-            (pygame.K_m,  'aux2',  1)
+            (pygame.K_m,  'aux2',  1),
+            (pygame.K_c, 'Fhalf',  1),
+            (pygame.K_x, 'Fzero',  1),
+            (pygame.K_z, 'Ffull',  1)
         ], dtypes)
 
-        self.delta = 0.05  # amount per interval that axis values slide towards zero
+        self.delta = 0.1  # amount per interval that axis values slide towards zero
 
         self.next_update_time = time.time()
         self.switch_interval_time = 0.25
@@ -79,8 +82,12 @@ class rosflight_keyboard_base():
                             if t > self.wait_until_time['aux2']:
                                 self.values['aux2'] *= -1
                                 self.wait_until_time['aux2'] = t + self.switch_interval_time
-                        elif key == pygame.K_q:
-                            self.quit()
+                        elif name == 'Fzero':
+                            self.values['F'] = -1.0
+                        elif name == 'Ffull':
+                            self.values['F'] = 1.0
+                        elif name == 'Fhalf':
+                            self.values['F'] = 0.0
                         else:
                             self.shift_value(name, sign)
 
@@ -88,7 +95,11 @@ class rosflight_keyboard_base():
 
     def shift_value(self, name, sign):
         ''' increment or decrement value of axis [name] in [sign] direction'''
-        self.values[name] += sign * self.delta
+        if name == 'F':
+            delta = self.delta/2
+        else:
+            delta = self.delta
+        self.values[name] += sign*delta
         val = self.values[name]
         if abs(val) >= 1.0:
             val = 1.0 if val > 0 else -1.0
