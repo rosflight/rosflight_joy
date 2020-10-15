@@ -28,7 +28,7 @@ class rosflight_keyboard_RC(rosflight_keyboard_base):
         if not self.auto_arm:
             self.auto_takeoff = False
             self.init = True
-        self.rate = rospy.Rate(50)
+        self.rate = rospy.Rate(30)
         if self.auto_arm:
             rospy.logwarn("[rc_keyboard] AUTO-ARM is ON. Waiting for firmware version")
         else:
@@ -39,7 +39,8 @@ class rosflight_keyboard_RC(rosflight_keyboard_base):
             rospy.loginfo("[rc_keyboard] AUTO-TAKEOFF is OFF.")
     def run(self):
         while not rospy.is_shutdown():
-
+            self.rate.sleep()
+          
             if self.got_version:
                 if self.auto_arm and not self.init:
                     self.arm()
