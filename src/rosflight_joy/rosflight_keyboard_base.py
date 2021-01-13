@@ -36,19 +36,19 @@ class rosflight_keyboard_base():
 
         dtypes = [('id', int), ('name', object), ('sign', int)]
         self.actions = np.array([
-            (pygame.K_UP,    'y', -1),
-            (pygame.K_DOWN,  'y',  1),
-            (pygame.K_LEFT,  'x', -1),
-            (pygame.K_RIGHT, 'x',  1),
-            (pygame.K_w,     'F',  1),
-            (pygame.K_s,     'F', -1),
-            (pygame.K_a,     'z', -1),
-            (pygame.K_d,     'z',  1),
-            (pygame.K_o,  'aux1',  1),
-            (pygame.K_m,  'aux2',  1),
-            (pygame.K_c, 'Fhalf',  1),
-            (pygame.K_x, 'Fzero',  1),
-            (pygame.K_z, 'Ffull',  1)
+            (pygame.KSCAN_UP,    'y', -1),
+            (pygame.KSCAN_DOWN,  'y',  1),
+            (pygame.KSCAN_LEFT,  'x', -1),
+            (pygame.KSCAN_RIGHT, 'x',  1),
+            (pygame.KSCAN_W,     'F',  1),
+            (pygame.KSCAN_S,     'F', -1),
+            (pygame.KSCAN_A,     'z', -1),
+            (pygame.KSCAN_D,     'z',  1),
+            (pygame.KSCAN_O,  'aux1',  1),
+            (pygame.KSCAN_M,  'aux2',  1),
+            (pygame.KSCAN_C, 'Fhalf',  1),
+            (pygame.KSCAN_X, 'Fzero',  1),
+            (pygame.KSCAN_Z, 'Ffull',  1)
         ], dtypes)
 
         self.delta = 0.1  # amount per interval that axis values slide towards zero
