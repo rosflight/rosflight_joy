@@ -37,15 +37,17 @@ class rosflight_keyboard_RC(rosflight_keyboard_base):
             rospy.logwarn("[rc_keyboard] AUTO-TAKEOFF is ON.")
         else:
             rospy.loginfo("[rc_keyboard] AUTO-TAKEOFF is OFF.")
+
     def run(self):
         while not rospy.is_shutdown():
             self.rate.sleep()
-          
+
             if self.got_version:
                 if self.auto_arm and not self.init:
                     self.arm()
                     if self.is_armed:
                         self.values['aux1'] = -1
+                        self.values['z'] = 0
                         if self.auto_takeoff:
                             self.values['F'] = 1
                         self.init = True
