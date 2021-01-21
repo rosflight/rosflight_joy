@@ -23,47 +23,44 @@ class rosflight_keyboard_base():
 
         self.print_limits = False
         self.limit_reached = False
-        
-        self.auto_arm = False
-        self.is_armed = False
-        self.init = False
 
-        self.values = dict()
-        self.values['x'] = 0
-        self.values['y'] = 0
-        self.values['F'] = 0
-        self.values['z'] = 0
-        self.values['aux1'] =  1
-        self.values['aux2'] = -1
+        self.values = dict()      # key: action
+        self.values['x'] = 0      # left/right: roll
+        self.values['y'] = 0      # up/down: pitch
+        self.values['F'] = -1     # w/s: throttle (z: full, x: zero, c: half)
+        self.values['z'] = 0      # a/d: yaw
+        self.values['aux1'] = -1  # o: rc override toggle
+        self.values['aux2'] = -1  # m: arm toggle (assumes ARM_CHANNEL=4)
         self.values['aux3'] = -1
         self.values['aux4'] = -1
-        
+
         dtypes = [('id', int), ('name', object), ('sign', int)]
         self.actions = np.array([
-            (pygame.K_UP,    'y', -1),
-            (pygame.K_DOWN,  'y',  1),
-            (pygame.K_LEFT,  'x', -1),
-            (pygame.K_RIGHT, 'x',  1),
-            (pygame.K_w,     'F',  1),
-            (pygame.K_s,     'F', -1),
-            (pygame.K_a,     'z', -1),
-            (pygame.K_d,     'z',  1),
-            (pygame.K_o,  'aux1',  1)
+            (pygame.KSCAN_UP,    'y', -1),
+            (pygame.KSCAN_DOWN,  'y',  1),
+            (pygame.KSCAN_LEFT,  'x', -1),
+            (pygame.KSCAN_RIGHT, 'x',  1),
+            (pygame.KSCAN_W,     'F',  1),
+            (pygame.KSCAN_S,     'F', -1),
+            (pygame.KSCAN_A,     'z', -1),
+            (pygame.KSCAN_D,     'z',  1),
+            (pygame.KSCAN_O,  'aux1',  1),
+            (pygame.KSCAN_M,  'aux2',  1),
+            (pygame.KSCAN_C, 'Fhalf',  1),
+            (pygame.KSCAN_X, 'Fzero',  1),
+            (pygame.KSCAN_Z, 'Ffull',  1)
         ], dtypes)
 
-        self.delta = 0.05  # amount per interval that axis values slide towards zero
+        self.delta = 0.1  # amount per interval that axis values slide towards zero
 
         self.next_update_time = time.time()
-        self.switch_wait_until_time = time.time()
         self.switch_interval_time = 0.25
+        self.wait_until_time = {
+            'aux1': time.time(),
+            'aux2': time.time()
+        }
 
     def update(self):
-
-        if self.auto_arm and not self.init:
-            self.values['F'] = -1
-            self.values['z'] =  1
-            return False
-        
         pygame.event.pump()
 
         # 50 Hz update
@@ -77,26 +74,37 @@ class rosflight_keyboard_base():
                         name = self.actions[self.actions['id']==key]['name'][0]
                         sign = self.actions[self.actions['id']==key]['sign'][0]
                         t = time.time()
-                        if name == 'aux1' and t > self.switch_wait_until_time:
-                            self.values['aux1'] *= -1
-                            self.switch_wait_until_time = t + self.switch_interval_time
-                        elif name != 'aux1':
+                        if name == 'aux1':
+                            if t > self.wait_until_time['aux1']:
+                                self.values['aux1'] *= -1
+                                self.wait_until_time['aux1'] = t + self.switch_interval_time
+                        elif name == 'aux2':
+                            if t > self.wait_until_time['aux2']:
+                                self.values['aux2'] *= -1
+                                self.wait_until_time['aux2'] = t + self.switch_interval_time
+                        elif name == 'Fzero':
+                            self.values['F'] = -1.0
+                        elif name == 'Ffull':
+                            self.values['F'] = 1.0
+                        elif name == 'Fhalf':
+                            self.values['F'] = 0.0
+                        else:
                             self.shift_value(name, sign)
-                        elif key == pygame.K_q:
-                            self.quit()
-            self.slide_to_zero(keys)
 
-    def get_value(self, key):
-        return self.values[key]
+            self.slide_to_zero(keys)
 
     def shift_value(self, name, sign):
         ''' increment or decrement value of axis [name] in [sign] direction'''
-        self.values[name] += sign * self.delta
+        if name == 'F':
+            delta = self.delta/2
+        else:
+            delta = self.delta
+        self.values[name] += sign*delta
         val = self.values[name]
         if abs(val) >= 1.0:
             val = 1.0 if val > 0 else -1.0
             if not self.limit_reached and self.print_limits:
-                print('{} {} value reached'.format(name, 
+                print('{} {} value reached'.format(name,
                                             'max' if val > 0 else 'min'))
                 self.limit_reached = True
         else:
@@ -105,10 +113,10 @@ class rosflight_keyboard_base():
         if abs(val) < 1e-6:
             val = 0.
         self.values[name] = val
-        
+
     def slide_to_zero(self, keys):
-        ''' for x,y,z axes, push values closer to zero if not currently pressed 
-            (joystick behavior)
+        ''' for x, y, z axes push values closer to zero if not currently pressed
+            (mimics joystick behavior)
         '''
         for n in ['x', 'y', 'z']:
             is_pressed = False
@@ -117,14 +125,15 @@ class rosflight_keyboard_base():
                     is_pressed = True
             if is_pressed:
                 continue
-                
+
             val = self.values[n]
             if abs(val) < 1e-6 and val != 0.:
                 val = 0.
             elif val != 0.:
                 val += self.delta if val < 0 else -self.delta
             self.values[n] = val
-    
+
+
     def quit(self):
         pygame.quit()
         sys.exit(0)
